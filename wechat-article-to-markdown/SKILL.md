@@ -1,6 +1,6 @@
 ---
 name: wechat-article-to-markdown
-description: "网页文章、微信公众号文章、飞书文档抓取并转换为 Markdown 文件，保留图片、表格、链接等完整内容"
+description: "网页文章、微信公众号文章、飞书文档抓取并转换为 Markdown 文件，保留图片、表格、链接等完整内容。触发词：发送微信/飞书链接、grab article、save as md、convert to markdown"
 triggers:
   - 用户发送微信公众号文章链接（mp.weixin.qq.com/s/...）
   - 用户发送飞书文档/Wiki链接（*.feishu.cn/wiki/... 或 *.feishu.cn/docx/...，包括自定义域名如 waytoagi.feishu.cn）
