@@ -35,14 +35,28 @@ triggers:
 
 ## 保存路径
 
-默认：`/Users/keihang/kai-work/素材库：阿恒识滴AI/00-inbox/new/`
+通过环境变量配置，安装后需根据你的目录结构设置：
 
-图片：`/Users/keihang/kai-work/素材库：阿恒识滴AI/00-inbox/assets/`
+| 环境变量 | 说明 | 默认值 |
+|----------|------|--------|
+| `X_ARTICLE_OUTPUT_DIR` | 文章保存目录 | `~/articles/inbox/` |
+| `X_ARTICLE_ASSETS_DIR` | 图片保存目录 | `~/articles/assets/` |
+| `X_ARTICLE_PUBLISH_DIR` | 发布目录 | `~/articles/publish/` |
+| `X_ARTICLE_DRAFT_DIR` | 草稿目录 | `~/articles/drafts/` |
+| `X_ARTICLE_EXTRACT_SCRIPT` | 提取脚本路径 | `~/.hermes/skills/wechat-article-to-markdown/scripts/extract_x_article.py` |
+
+```bash
+# 在 ~/.hermes/.env 或 shell profile 中设置
+export X_ARTICLE_OUTPUT_DIR="/path/to/your/inbox"
+export X_ARTICLE_ASSETS_DIR="/path/to/your/assets"
+export X_ARTICLE_PUBLISH_DIR="/path/to/your/publish"
+export X_ARTICLE_DRAFT_DIR="/path/to/your/drafts"
+```
 
 用户路由偏好（根据关键词判断）：
-- 用户说"发表"/"发布"/"发表文章" → `/Users/keihang/kai-work/ip孵化：阿恒识滴AI/发表文章/`
-- 用户说"草稿"/"草稿箱" → `/Users/keihang/kai-work/ip孵化：阿恒识滴AI/草稿/`
-- 无明确指示 → 素材库 `00-inbox/new/`
+- 用户说"发表"/"发布"/"发表文章" → `$X_ARTICLE_PUBLISH_DIR`
+- 用户说"草稿"/"草稿箱" → `$X_ARTICLE_DRAFT_DIR`
+- 无明确指示 → `$X_ARTICLE_OUTPUT_DIR`
 
 ## 快速工作流（2步完成）
 
@@ -221,10 +235,9 @@ tags:
 - **依赖脚本**：`~/.hermes/skills/wechat-article-to-markdown/scripts/extract_x_article.py`
 - **翻译最佳实践**：`references/translation-best-practices.md`
 
-## 发布与分发注意
+## 跨技能依赖
 
-- **路径参数化**：SKILL.md 中的保存路径（`/Users/keihang/kai-work/...`）是个人路径，发布到 GitHub 前需改为环境变量或参数传入（如 `$X_ARTICLE_OUTPUT_DIR`、`$X_ARTICLE_ASSETS_DIR`），否则其他用户无法直接使用。
-- **跨技能依赖**：本技能依赖 `~/.hermes/skills/wechat-article-to-markdown/scripts/extract_x_article.py`。发布到独立仓库时，需将该脚本复制到本技能的 `scripts/` 目录中，或在文档中说明依赖关系。
+本技能依赖 `wechat-article-to-markdown` 技能的 `scripts/extract_x_article.py` 脚本。默认路径为 `~/.hermes/skills/wechat-article-to-markdown/scripts/extract_x_article.py`，可通过 `X_ARTICLE_EXTRACT_SCRIPT` 环境变量自定义。
 
 ## 扩展性
 

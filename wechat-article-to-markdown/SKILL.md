@@ -25,14 +25,27 @@ triggers:
 
 ## 保存路径
 
-默认：`/Users/keihang/kai-work/素材库：阿恒识滴AI/00-inbox/new/`
+通过环境变量配置，安装后需根据你的目录结构设置：
 
-图片：`/Users/keihang/kai-work/素材库：阿恒识滴AI/00-inbox/assets/`
+| 环境变量 | 说明 | 默认值 |
+|----------|------|--------|
+| `ARTICLE_OUTPUT_DIR` | 文章保存目录 | `~/articles/inbox/` |
+| `ARTICLE_ASSETS_DIR` | 图片保存目录 | `~/articles/assets/` |
+| `ARTICLE_PUBLISH_DIR` | 发布目录 | `~/articles/publish/` |
+| `ARTICLE_DRAFT_DIR` | 草稿目录 | `~/articles/drafts/` |
+
+```bash
+# 在 ~/.hermes/.env 或 shell profile 中设置
+export ARTICLE_OUTPUT_DIR="/path/to/your/inbox"
+export ARTICLE_ASSETS_DIR="/path/to/your/assets"
+export ARTICLE_PUBLISH_DIR="/path/to/your/publish"
+export ARTICLE_DRAFT_DIR="/path/to/your/drafts"
+```
 
 用户路由偏好（根据关键词判断）：
-- 用户说"发表"/"发布"/"发表文章" → `/Users/keihang/kai-work/ip孵化：阿恒识滴AI/发表文章/`
-- 用户说"草稿"/"草稿箱" → `/Users/keihang/kai-work/ip孵化：阿恒识滴AI/草稿/`
-- 无明确指示 → 素材库 `00-inbox/new/`
+- 用户说"发表"/"发布"/"发表文章" → `$ARTICLE_PUBLISH_DIR`
+- 用户说"草稿"/"草稿箱" → `$ARTICLE_DRAFT_DIR`
+- 无明确指示 → `$ARTICLE_OUTPUT_DIR`
 
 ## 转换要求
 
@@ -340,7 +353,7 @@ lark-cli docs +media-download --token "{image_token}" --type media --output "fil
 
 **lark-cli 媒体下载语法**（需先 `cd` 到目标目录，--output 只接受相对路径）：
 ```bash
-cd "/Users/keihang/kai-work/素材库：阿恒识滴AI/00-inbox/assets"
+cd "$ARTICLE_ASSETS_DIR"
 lark-cli docs +media-download --token "IMAGE_TOKEN" --type media --output "filename.png" --as bot
 ```
 如果 bot 缺权限（99991672），此命令会失败。此时：
@@ -413,7 +426,7 @@ WeChat 文章的 HTML 结构模式详见 `references/wechat-patterns.md`。
 grep -o 'https://[^)]*' /path/to/article.md | grep -E 'mmbiz\.qpic'
 
 # 2. 逐个下载到 00-inbox/assets/，文件名格式：{date}_{slug}_{序号}.{ext}
-python3 -c "import urllib.request; urllib.request.urlretrieve('IMAGE_URL', '/Users/keihang/kai-work/素材库：阿恒识滴AI/00-inbox/assets/{filename}')"
+python3 -c "import urllib.request; urllib.request.urlretrieve('IMAGE_URL', '$ARTICLE_ASSETS_DIR/{filename}')"
 
 # 3. 替换文章中的链接为本地路径
 # 用 execute_code 或 Python 脚本做批量替换，不要用 sed（URL 中的特殊字符容易出错）
@@ -464,10 +477,9 @@ python3 -c "import urllib.request; urllib.request.urlretrieve('IMAGE_URL', '/Use
 - **拖拽附件不支持文件夹**：Hermes Desktop 的拖拽功能只支持单个文件，拖入文件夹会报错 `file not found on gateway and no data_url provided`，右侧面板会显示 `path points to a directory`。如需让 AI 读取整个技能目录，直接在聊天框中说明路径即可，不需要拖拽。
 - **推荐用法**：直接在聊天中发送链接（微信/飞书），技能会自动触发。如需查看技能文件内容，使用 `/skill wechat-article-to-markdown` 或在对话中提及即可。
 
-## 发布与分发注意
+## 脚本依赖
 
-- **路径参数化**：SKILL.md 中的保存路径（`/Users/keihang/kai-work/...`）是个人路径，发布到 GitHub 前需改为环境变量或参数传入（如 `$ARTICLE_OUTPUT_DIR`、`$ARTICLE_ASSETS_DIR`），否则其他用户无法直接使用。
-- **脚本依赖**：`scripts/extract_x_article.py` 被 `x-article-processor` 技能引用，发布时需确保两个技能的脚本路径关系正确，或将该脚本合并到本技能的 scripts 目录中。
+- `scripts/extract_x_article.py` 被 `x-article-processor` 技能引用。如果两个技能安装在不同位置，需通过 `X_ARTICLE_EXTRACT_SCRIPT` 环境变量指定脚本路径。
 
 ## Pitfalls（图片本地化）
 

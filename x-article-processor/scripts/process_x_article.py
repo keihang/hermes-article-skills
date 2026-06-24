@@ -8,8 +8,8 @@
     python3 process_x_article.py urls.txt  # 批量处理
 
 环境变量配置：
-    X_ARTICLE_ASSETS_DIR: 图片保存目录（默认：~/ai 学习/素材库：阿恒识滴AI/00-inbox/assets）
-    X_ARTICLE_OUTPUT_DIR: 文章保存目录（默认：~/ai 学习/素材库：阿恒识滴AI/00-inbox/new）
+    X_ARTICLE_ASSETS_DIR: 图片保存目录（默认：~/articles/assets）
+    X_ARTICLE_OUTPUT_DIR: 文章保存目录（默认：~/articles/inbox）
     X_ARTICLE_EXTRACT_SCRIPT: 提取脚本路径（默认：~/.hermes/skills/wechat-article-to-markdown/scripts/extract_x_article.py）
 
 优化点：
@@ -40,9 +40,9 @@ def get_config():
     """从环境变量获取配置，提供默认值"""
     home = os.path.expanduser("~")
     
-    # 默认路径
-    default_assets = os.path.join(home, "ai 学习", "素材库：阿恒识滴AI", "00-inbox", "assets")
-    default_output = os.path.join(home, "ai 学习", "素材库：阿恒识滴AI", "00-inbox", "new")
+    # 默认路径（可通过环境变量覆盖）
+    default_assets = os.path.join(home, "articles", "assets")
+    default_output = os.path.join(home, "articles", "inbox")
     default_extract = os.path.join(home, ".hermes", "skills", "wechat-article-to-markdown", "scripts", "extract_x_article.py")
     
     return {
