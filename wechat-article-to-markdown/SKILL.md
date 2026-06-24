@@ -486,3 +486,20 @@ python3 -c "import urllib.request; urllib.request.urlretrieve('IMAGE_URL', '$ART
 ### 用户偏好（重要）
 17. **重复图片 URL**：部分文章会重复使用同一图片 URL（如排行榜文章每项配同一张图）。sed 的 `g` flag 会全局替换所有出现，这是正确行为，无需特殊处理。
 18. **图片文件名规范**：按 CLAUDE.md 命名，格式为 `{descriptive-slug}-{序号}.{ext}`，如 `hermes-tutorial-rewrite-01.png`。序号两位数补零，便于排序。
+
+## 反例与黑名单（不要做什么）
+
+> 以下是经验证的反模式。违反任一条会导致输出质量下降或流程失败。
+
+| # | 禁止行为 | 后果 | 正确做法 |
+|---|---------|------|---------|
+| 1 | 用 `python3 -c "..."` 内联执行 3MB+ HTML | timeout，进程卡死 | 写入 `/tmp/extract_*.py` 再 `python3 /tmp/xxx.py` |
+| 2 | curl 不加代理直连微信 CDN | exit code 28 timeout | 必须加 `--proxy http://127.0.0.1:7890` |
+| 3 | 用 `grep -oP` 在 macOS | 报错 `invalid option` | 用 `grep -o` + `sed` 替代 |
+| 4 | 跳过语言检测直接保存 | 英文文章未翻译，素材库质量下降 | 每次必须判断语言，英文必须翻译 |
+| 5 | 翻译后忘记替换图片 URL | 图片仍指向外部 URL，后续本地化失败 | delegate_task 返回后必须在组装阶段替换 |
+| 6 | `source` 字段写死"微信公众号" | 丢失溯源信息，无法回溯原文 | 必须填实际文章 URL |
+| 7 | 用 `git reset --hard` 回滚 | 丢失工作树未提交改动 | 用 `git revert HEAD` 创建反向 commit |
+| 8 | 同一个 session 又改又评 | LLM 自评准确率仅 46.4%，乐观偏差 | 评分用独立子 agent |
+| 9 | 图片替换用简单 sed 字符串替换 | URL 中特殊字符导致替换失败 | 用 Python 正则批量替换 |
+| 10 | 生成 `![图片](![[filename]])` 双层嵌套 | Markdown 渲染错误 | 正确格式是 `![[filename.jpg]]` |
