@@ -469,7 +469,7 @@ python3 -c "import urllib.request; urllib.request.urlretrieve('IMAGE_URL', '$ART
 
 ### 用户偏好（重要）
 17. **重复图片 URL**：部分文章会重复使用同一图片 URL（如排行榜文章每项配同一张图）。sed 的 `g` flag 会全局替换所有出现，这是正确行为，无需特殊处理。
-18. **图片文件名规范**：按 CLAUDE.md 命名，格式为 `{descriptive-slug}-{序号}.{ext}`，如 `hermes-tutorial-rewrite-01.png`。序号两位数补零，便于排序。
+18. **图片文件名规范**：格式为 `{article-slug}-{序号}.{ext}`，序号两位数补零。示例：文章 `codex-guide.md` 的图片 → `codex-guide-01.png`、`codex-guide-02.png`。禁止用中文文件名、禁止用时间戳作文件名。
 
 ## 反例与黑名单（不要做什么）
 
