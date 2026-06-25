@@ -234,28 +234,6 @@ decoded = html_module.unescape(decoded)
 8. **批量处理用 delegate_task**：多个文章链接时，用 delegate_task 并行处理比逐个执行效率高得多。每个子任务的指令要包含完整的 fallback 元数据提取步骤。
 9. **标题含引号导致 SyntaxError**：微信标题常含中文引号（`"`、`"`），直接拼入 Python f-string 会报 `SyntaxError: invalid syntax`。用 `title.replace('"', '\\"')` 转义后再拼入 f-string 的 `"""` 区域，或改用单引号字符串 + unicode 转义（`\u201c` / `\u201d`）。
 9. **开头孤立 `>`**：微信文章 HTML 中 section/div 嵌套 blockquote 会导致提取内容开头出现孤立的 `>` 字符。已在 `extract_wechat.py` 中添加自动清理（匹配 `^\s*>\s*\n`），如遇新情况请检查脚本是否生效。
-
-### 网络与环境
-
-0. **/tmp 下的脚本会被清理**：macOS 会定期清理 /tmp 目录。如果 cp 到 /tmp/extract_wechat.py 报 "No such file or directory"，直接用 skill 目录下的原版脚本：`python3 ~/.hermes/skills/wechat-article-to-markdown/scripts/extract_wechat.py /tmp/wechat_article.html`。不要重复 cp，直接调源路径即可。
-00. **需要代理**：当前环境下载微信文章需要代理，curl 必须加 `--proxy http://127.0.0.1:7890`。不加代理会 timeout（exit code 28）。
-
-### 微信文章
-
-0. **Shadow DOM 新格式**：2025年起部分微信文章使用 Shadow DOM 渲染，`js_content` div 不存在。症状：`extract_wechat.py` 报 `ERROR: Could not find js_content`。解决方案：检测 HTML 是否含 `shadow` 关键字且无 `id="js_content"` div，若有则使用 `scripts/extract_shadow_dom.py` 提取。内容通常在 JS 变量 `content:` 字段中，使用 `\x0a` 作为换行符。详见 `references/shadow-dom-format.md`。
-1. **Python timeout**：微信文章 HTML 通常 3-4MB，内联 `python3 -c "..."` 会 timeout。必须将脚本写入文件再执行。
-2. **curl 下载超时**：国内网络环境下 curl 直连微信 CDN 可能超时（exit code 28）。需加 `--proxy http://127.0.0.1:7890` 走本地代理。如果仍失败，加大 `--max-time 60`。
-3. **macOS grep 不支持 -P**：不能用 `grep -oP`，用 `grep -o` 配合 `sed` 替代。
-3. **尾部噪音**：提取的内容末尾通常包含 `var first_sceen__time` 等 JS 代码和 "预览时标签不可点" 等无关文本，必须在后处理中截断。
-4. **开头噪音**：`js_content` div 的 `style` 属性有时会残留在正文开头。
-5. **代码块格式**：微信文章的 `<pre><code>` 块内可能有嵌套 `<span>`（语法高亮），转换时需先去除 span 标签再提取纯文本。
-6. **内联代码 vs 围栏代码**：微信文章通常不区分，提取脚本需根据上下文（是否在 `<pre>` 内）决定用 `` ` `` 还是 ` ``` `。
-7. **空列表项残留**：微信 HTML 中 `<ul>` 嵌套 `<li>` 有时会产生孤立的 `- ` 行（无文本内容）。后处理时用 `re.sub(r'^- \s*$', '', line)` 或逐行过滤清理。
-8. **元数据提取不稳定**：不同公众号的 HTML 结构差异大，标准 `js_title_inner` / `js_author_name_text` 经常匹配失败（实测 og:title / og:article:author 的 meta 标签反而是最可靠的来源）。必须按 fallback 链依次尝试（见 Step 2）。如果所有方法都失败，标题/作者设为"未知"，不要阻塞流程。
-8. **批量处理用 delegate_task**：多个文章链接时，用 delegate_task 并行处理比逐个执行效率高得多。每个子任务的指令要包含完整的 fallback 元数据提取步骤。
-9. **标题含引号导致 SyntaxError**：微信标题常含中文引号（`"`、`"`），直接拼入 Python f-string 会报 `SyntaxError: invalid syntax`。用 `title.replace('"', '\\"')` 转义后再拼入 f-string 的 `"""` 区域，或改用单引号字符串 + unicode 转义（`\u201c` / `\u201d`）。
-9. **开头孤立 `>`**：微信文章 HTML 中 section/div 嵌套 blockquote 会导致提取内容开头出现孤立的 `>` 字符。已在 `extract_wechat.py` 中添加自动清理（匹配 `^\s*>\s*\n`），如遇新情况请检查脚本是否生效。
-
 ### 飞书文档
 
 19. **飞书页面客户端渲染**：curl 抓到的 HTML 是空壳，正文在 JS 中。必须走 Open API（`raw_content` 端点）。
