@@ -199,6 +199,18 @@ source: "https://mp.weixin.qq.com/s/..."  # ← 必须填实际 URL
 
 ## Pitfalls
 
+### Fallback 路径速查表（if-then 分支）
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|---------|---------|-----------|
+| `extract_wechat.py` 报 `Could not find js_content` | 检测 HTML 是否含 `shadow` 关键字 → 用 `extract_shadow_dom.py` | 手动提取 JS 变量 `content:` 字段，用 `\x0a` 分隔段落 |
+| `python3 -c "..."` timeout | 写入 `/tmp/extract_*.py` 再 `python3 /tmp/xxx.py` | 直接调源路径 `python3 ~/.hermes/skills/.../scripts/extract_*.py` |
+| curl exit code 28（超时） | 加 `--proxy http://127.0.0.1:7890` | 加大 `--max-time 60`，仍失败则提示用户检查代理 |
+| `grep -oP` 报错 | 改用 `grep -o` + `sed` 替代 | 用 Python 正则提取 |
+| og:title / og:article:author 匹配失败 | fallback 到 JS 变量 `var msg_title` / `var nickname` | 标题/作者设为"未知"，不阻塞流程 |
+| lark-cli 报 `not bound` | `lark-cli config bind --source hermes --identity bot-only` | 改用 Open API 直接调用 |
+| 飞书图片下载返回 99991672 | 用 `docs_ai` API 获取带 authcode 的 URL | 用 `raw_content` + blocks API 回退 |
+
 ### 特殊HTML结构
 
 0. **Shadow DOM 文章**：部分微信文章使用 Shadow DOM，`extract_wechat.py` 脚本会报 `ERROR: Could not find js_content`。此时内容在 JavaScript 变量 `content: '...'` 中，用 `\x0a` 分隔段落。解决方案：
